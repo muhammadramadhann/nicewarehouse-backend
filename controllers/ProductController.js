@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import Product from "../models/Product.js";
 import path from "path";
 import fs from "fs";
@@ -17,6 +18,16 @@ const productCodeGenerator = () => {
 export const getProducts = async (req, res) => {
     try {
         const products = await Product.findAll();
+        if (req.query.search !== undefined) {
+            const filteredProducts = await Product.findAll({
+                where: {
+                    name: {
+                        [Op.like]: '%' + req.query.search + '%'
+                    }
+                }
+            });
+            return res.json(filteredProducts);
+        }
         res.json(products);
     } catch (error) {
         res.status(500).json({ message: error.message });
